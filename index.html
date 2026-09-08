@@ -206,29 +206,58 @@ placeholder="e.g. Who was Maharana Pratap?">
 </footer>
 
 <script>
-function askAI(){
+async function askAI() {
+  const q = document.getElementById("question").value.trim();
+  const box = document.getElementById("answer");
 
-let q=document.getElementById("question").value.trim();
-let box=document.getElementById("answer");
+  if (!q) {
+    box.style.display = "block";
+    box.innerHTML = "⚠️ Please enter a history question.";
+    return;
+  }
 
-if(!q){
-box.style.display="block";
-box.innerHTML="⚠️ Please enter a history question.";
-return;
+  box.style.display = "block";
+  box.innerHTML =
+    "<b>Your question:</b> " + q +
+    "<br><br>🤖 SahilItihasAI is thinking...";
+
+  try {
+    const response = await fetch(
+      "https://sahilitihasai-api.sahil8292230521.workers.dev",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: q
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "AI request failed.");
+    }
+
+    box.innerHTML =
+      "<b>Your question:</b> " + q +
+      "<br><br><b>🤖 SahilItihasAI:</b><br>" +
+      data.answer.replace(/\n/g, "<br>");
+
+  } catch (error) {
+    box.innerHTML =
+      "<b>Your question:</b> " + q +
+      "<br><br>❌ AI connection failed.<br>" +
+      "<small>" + error.message + "</small>";
+  }
 }
 
-box.style.display="block";
-box.innerHTML=
-"<b>Your question:</b> "+q+
-"<br><br>🤖 SahilItihasAI is preparing a historical answer..."+
-"<br><br><small>AI connection will be added in the next step.</small>";
-}
-
-function askTopic(topic){
-document.getElementById("question").value=topic;
-askAI();
-}
-</script>
+function askTopic(topic) {
+  document.getElementById("question").value = topic;
+  askAI();
+  }
 
 </body>
 </html>
